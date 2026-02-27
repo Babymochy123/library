@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from './api';
 
 function SignUp({ setToken }) {
     const [username, setUsername] = useState('');
@@ -17,14 +18,14 @@ function SignUp({ setToken }) {
 
         try {
             // Create user
-            await axios.post('http://127.0.0.1:8000/api/signup/', {
+            await axios.post(`${API_BASE_URL}/api/signup/`, {
                 username,
                 password,
                 email,
             });
 
             // Auto login after signup
-            const loginResponse = await axios.post('http://127.0.0.1:8000/api/token/', {
+            const loginResponse = await axios.post(`${API_BASE_URL}/api/token/`, {
                 username,
                 password,
             });

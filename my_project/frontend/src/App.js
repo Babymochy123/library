@@ -59,7 +59,7 @@ function App() {
           />
           <Route
             path="/signup"
-            element={token ? <Navigate to="/" /> : <SignUp setToken={setToken} />}
+            element={token ? <Navigate to="/" /> : <SignUp setToken={handleLogin} />}
           />
           <Route
             path="/admin"

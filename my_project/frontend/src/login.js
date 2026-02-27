@@ -43,8 +43,7 @@ function Login({ setToken }) {
             let errorMessage = 'Login failed. Please try again.';
 
             if (!err.response) {
-                // Network error - server might not be running
-                errorMessage = 'Cannot connect to server. Please make sure the backend is running on http://127.0.0.1:8000';
+                errorMessage = 'Cannot connect to server. Please try again in a few seconds.';
             } else if (err.response.data) {
                 errorMessage = err.response.data.detail ||
                     err.response.data.error ||
