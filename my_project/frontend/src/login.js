@@ -5,6 +5,7 @@ import { authAPI } from './api';
 function Login({ setToken }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loginRole, setLoginRole] = useState('member');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -18,23 +19,30 @@ function Login({ setToken }) {
             const response = await authAPI.login(username, password);
             console.log('Login response:', response.data);
 
+            // Check if user is admin (is_staff or is_superuser)
+            const isAdmin = response.data.is_staff === true || response.data.is_superuser === true;
+            console.log('Is Admin:', isAdmin);
+
+            if (loginRole === 'admin' && !isAdmin) {
+                setError('This account does not have admin access.');
+                return;
+            }
+
             localStorage.setItem('token', response.data.access);
             if (response.data.refresh) {
                 localStorage.setItem('refresh', response.data.refresh);
             }
 
-            // Check if user is admin (is_staff or is_superuser)
-            const isAdmin = response.data.is_staff === true || response.data.is_superuser === true;
-            console.log('Is Admin:', isAdmin);
+            const sessionIsAdmin = loginRole === 'admin';
 
             // Store isAdmin in localStorage
-            localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+            localStorage.setItem('isAdmin', sessionIsAdmin ? 'true' : 'false');
 
             // Call setToken with both token and isAdmin
-            setToken(response.data.access, isAdmin);
+            setToken(response.data.access, sessionIsAdmin);
 
-            // Navigate based on admin status
-            navigate(isAdmin ? '/admin' : '/');
+            // Navigate based on selected role
+            navigate(loginRole === 'admin' ? '/admin' : '/');
         } catch (err) {
             console.error('Full error:', err);
             console.error('Error response:', err.response);
@@ -75,6 +83,13 @@ function Login({ setToken }) {
                     onChange={e => setPassword(e.target.value)}
                     required
                 />
+                <select
+                    value={loginRole}
+                    onChange={e => setLoginRole(e.target.value)}
+                >
+                    <option value="member">Login as Member</option>
+                    <option value="admin">Login as Admin</option>
+                </select>
                 <button type="submit" disabled={loading}>
                     {loading ? 'Logging in...' : 'Login'}
                 </button>

@@ -63,15 +63,18 @@ h1 {
 }
 
 /* Input Styles */
-input {
+input,
+select {
   padding: 12px 15px;
   border: 2px solid #e1e1e1;
   border-radius: 5px;
   font-size: 16px;
   transition: all 0.3s ease;
+  background: #fff;
 }
 
-input:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
