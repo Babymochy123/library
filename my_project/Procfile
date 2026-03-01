@@ -1,1 +1,1 @@
-web: gunicorn my_project.wsgi:application
+web: python manage.py migrate && python manage.py ensure_superuser && gunicorn my_project.wsgi:application
