@@ -14,6 +14,11 @@ from pathlib import Path
 import os
 import dj_database_url
 
+
+def _get_list_env(var_name, default=''):
+    raw_value = os.getenv(var_name, default)
+    return [item.strip() for item in raw_value.split(',') if item.strip()]
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,12 +27,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-95)h-$a#emoj*d62$t&-co!=e&5psq+)@wa+!d+qov0*v8y*fw'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-95)h-$a#emoj*d62$t&-co!=e&5psq+)@wa+!d+qov0*v8y*fw')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = _get_list_env('ALLOWED_HOSTS', '127.0.0.1,localhost,.onrender.com')
+CSRF_TRUSTED_ORIGINS = _get_list_env(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000'
+)
 
 
 # Application definition
@@ -55,8 +64,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'my_project.urls'
 
@@ -109,10 +116,18 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-# CORS Settings (use only one method)
-CORS_ALLOW_ALL_ORIGINS = True  # Use this for development
-# CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']  # Use this for production
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'True') == 'True'
+CORS_ALLOWED_ORIGINS = _get_list_env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = True
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
