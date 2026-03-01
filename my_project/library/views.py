@@ -7,6 +7,7 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from .models import Book, BorrowRecord
 from .serializers import BookSerializer, BorrowRecordSerializer, UserSerializer
+from .auth_utils import is_permanent_admin
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -28,7 +29,7 @@ class BorrowRecordViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Admin users see all records, regular users see only their own
-        if self.request.user.is_staff or self.request.user.is_superuser:
+        if is_permanent_admin(self.request.user):
             return BorrowRecord.objects.all()
         return BorrowRecord.objects.filter(user=self.request.user)
 
@@ -71,7 +72,7 @@ class BorrowRecordViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def issue_to_user(self, request):
-        if not request.user.is_staff and not request.user.is_superuser:
+        if not is_permanent_admin(request.user):
             return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
 
         user_id = request.data.get('user_id')
@@ -143,7 +144,7 @@ class AdminStatsView(APIView):
 
     def get(self, request):
         # Only allow admin users
-        if not request.user.is_staff and not request.user.is_superuser:
+        if not is_permanent_admin(request.user):
             return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
 
         total_books = Book.objects.count()
@@ -169,7 +170,7 @@ class UserManagementView(APIView):
 
     def get(self, request):
         # Only allow admin users
-        if not request.user.is_staff and not request.user.is_superuser:
+        if not is_permanent_admin(request.user):
             return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
 
         users = User.objects.all().values('id', 'username', 'email', 'is_staff', 'is_superuser', 'is_active')
@@ -177,7 +178,7 @@ class UserManagementView(APIView):
 
     def post(self, request):
         # Only allow admin users to create users
-        if not request.user.is_staff and not request.user.is_superuser:
+        if not is_permanent_admin(request.user):
             return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
 
         username = request.data.get('username')

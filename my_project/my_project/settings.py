@@ -37,6 +37,7 @@ CSRF_TRUSTED_ORIGINS = _get_list_env(
     'CSRF_TRUSTED_ORIGINS',
     'http://localhost:3000,http://127.0.0.1:3000'
 )
+PERMANENT_ADMIN_USERNAME = os.getenv('PERMANENT_ADMIN_USERNAME', 'yusra')
 
 
 # Application definition

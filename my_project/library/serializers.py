@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Book, BorrowRecord
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .auth_utils import is_permanent_admin
 
 
 
@@ -45,7 +46,8 @@ class BorrowRecordSerializer(serializers.ModelSerializer):
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        data['is_staff'] = self.user.is_staff
-        data['is_superuser'] = self.user.is_superuser
+        is_admin = is_permanent_admin(self.user)
+        data['is_staff'] = is_admin
+        data['is_superuser'] = is_admin
         return data
 
